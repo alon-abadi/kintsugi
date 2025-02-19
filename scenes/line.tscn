@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dv7cee5fj7qgb"]
+
+[ext_resource type="Script" path="res://scenes/line.gd" id="1_bxt8b"]
+
+[node name="Line" type="Node2D"]
+script = ExtResource("1_bxt8b")

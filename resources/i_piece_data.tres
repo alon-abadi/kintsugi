@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=3 format=3 uid="uid://bx53bnyknoark"]
+
+[ext_resource type="Texture2D" uid="uid://bn2o22md8kdec" path="res://assets/White.png" id="1_asega"]
+[ext_resource type="Script" path="res://scenes/piece_data.gd" id="2_lqk8b"]
+
+[resource]
+script = ExtResource("2_lqk8b")
+piece_texture = ExtResource("1_asega")
+tetromino_type = 0
+spawn_position = Vector2(-24, -456)

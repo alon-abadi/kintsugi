@@ -1,0 +1,65 @@
+[gd_scene load_steps=8 format=3 uid="uid://mfer0ek0w1y8"]
+
+[ext_resource type="Texture2D" uid="uid://ffwoho5dav7x" path="res://assets/Border.png" id="1_jfcr8"]
+[ext_resource type="Texture2D" uid="uid://c3i1eo5wfetmo" path="res://assets/Grid.png" id="2_h6b4d"]
+[ext_resource type="Script" path="res://scenes/piece_spawner.gd" id="3_87jhv"]
+[ext_resource type="Script" path="res://scenes/board.gd" id="4_s43os"]
+[ext_resource type="PackedScene" uid="uid://cu0oot157t2o0" path="res://scenes/tetromino.tscn" id="5_adtop"]
+[ext_resource type="PackedScene" uid="uid://cv6o71yx3jejf" path="res://scenes/UI.tscn" id="6_5l2sy"]
+[ext_resource type="PackedScene" uid="uid://dv7cee5fj7qgb" path="res://scenes/line.tscn" id="6_k5273"]
+
+[node name="Main" type="Node"]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.5, 0.5)
+
+[node name="Border" type="TextureRect" parent="."]
+offset_left = -256.0
+offset_top = -496.0
+offset_right = 1794.0
+offset_bottom = 3474.0
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("1_jfcr8")
+
+[node name="Grid" type="TextureRect" parent="Border"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -961.0
+offset_top = -1921.0
+offset_right = 959.0
+offset_bottom = 1928.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_h6b4d")
+stretch_mode = 1
+
+[node name="PieceSpawner" type="Node" parent="." node_paths=PackedStringArray("board")]
+script = ExtResource("3_87jhv")
+board = NodePath("../Board")
+
+[node name="Board" type="Node" parent="." node_paths=PackedStringArray("panel_container")]
+script = ExtResource("4_s43os")
+tetromino_scene = ExtResource("5_adtop")
+line_scene = ExtResource("6_k5273")
+panel_container = NodePath("../PanelContainer")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(100, 100)
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_top = -962.5
+offset_bottom = -862.5
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="PanelContainer"]
+layout_mode = 2
+text = "Next"
+
+[node name="UI" parent="." instance=ExtResource("6_5l2sy")]
