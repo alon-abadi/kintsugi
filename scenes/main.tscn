@@ -1,5 +1,6 @@
-[gd_scene load_steps=8 format=3 uid="uid://mfer0ek0w1y8"]
+[gd_scene load_steps=16 format=3 uid="uid://mfer0ek0w1y8"]
 
+[ext_resource type="Script" path="res://scenes/difficulty_manager.gd" id="1_fqqvb"]
 [ext_resource type="Texture2D" uid="uid://ffwoho5dav7x" path="res://assets/Border.png" id="1_jfcr8"]
 [ext_resource type="Texture2D" uid="uid://c3i1eo5wfetmo" path="res://assets/Grid.png" id="2_h6b4d"]
 [ext_resource type="Script" path="res://scenes/piece_spawner.gd" id="3_87jhv"]
@@ -7,8 +8,31 @@
 [ext_resource type="PackedScene" uid="uid://cu0oot157t2o0" path="res://scenes/tetromino.tscn" id="5_adtop"]
 [ext_resource type="PackedScene" uid="uid://cv6o71yx3jejf" path="res://scenes/UI.tscn" id="6_5l2sy"]
 [ext_resource type="PackedScene" uid="uid://dv7cee5fj7qgb" path="res://scenes/line.tscn" id="6_k5273"]
+[ext_resource type="AudioStream" uid="uid://djo8gf8psobmo" path="res://assets/music/level 1.mp3" id="8_gp6k3"]
+[ext_resource type="Script" path="res://scenes/node.gd" id="9_iplbh"]
+[ext_resource type="AudioStream" uid="uid://cny2k6y1ebiju" path="res://assets/music/level 2.mp3" id="9_qrqb3"]
+[ext_resource type="AudioStream" uid="uid://d24go02qk3r7n" path="res://assets/music/level 3.mp3" id="10_rbunp"]
+[ext_resource type="Texture2D" uid="uid://dl20j1uj3rsgq" path="res://assets/background-noise.png" id="13_n87gj"]
+
+[sub_resource type="AudioStreamSynchronized" id="AudioStreamSynchronized_qdbh6"]
+stream_count = 3
+stream_0/stream = ExtResource("8_gp6k3")
+stream_0/volume = 0.0
+stream_1/stream = ExtResource("9_qrqb3")
+stream_1/volume = -60.0
+stream_2/stream = ExtResource("10_rbunp")
+stream_2/volume = -60.0
+
+[sub_resource type="AudioStreamInteractive" id="AudioStreamInteractive_37w4g"]
+clip_count = 1
+clip_0/name = &""
+clip_0/stream = SubResource("AudioStreamSynchronized_qdbh6")
+clip_0/auto_advance = 0
 
 [node name="Main" type="Node"]
+
+[node name="DifficultyManager" type="Node" parent="."]
+script = ExtResource("1_fqqvb")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(0.5, 0.5)
@@ -63,3 +87,32 @@ layout_mode = 2
 text = "Next"
 
 [node name="UI" parent="." instance=ExtResource("6_5l2sy")]
+
+[node name="MusicManager" type="Node" parent="." node_paths=PackedStringArray("streamPlayer", "timer", "board")]
+script = ExtResource("9_iplbh")
+streamPlayer = NodePath("AudioStreamPlayer")
+timer = NodePath("Timer")
+board = NodePath("../Board")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="MusicManager"]
+stream = SubResource("AudioStreamInteractive_37w4g")
+
+[node name="Timer" type="Timer" parent="MusicManager"]
+wait_time = 2.0
+autostart = true
+
+[node name="TextureRect" type="TextureRect" parent="."]
+z_index = -1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -720.0
+offset_top = -960.0
+offset_right = -240.0
+offset_bottom = -320.0
+grow_horizontal = 2
+grow_vertical = 2
+scale = Vector2(2, 2)
+texture = ExtResource("13_n87gj")

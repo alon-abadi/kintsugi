@@ -7,17 +7,26 @@ signal lock_tetromino(tetromino: Tetromino)
 var bounds = {
 	"min_x": -216, 
 	"max_x": 216, #216 +48 = 264
+	"min_y": -300,
 	"max_y": 457, #480 - 48/2 -1 = 457
 }
+
+enum modes {
+	FALLING,
+	STATIC,
+	FLOATING
+}
+var mode: modes
 
 var rotation_index = 0
 var wall_kicks
 var tetromino_data
-var is_next_piece
+var is_preview
 var tetromino_cells
 var pieces = []
 var other_pieces
-
+var gravity: bool = true
+var ghost: bool = false
 var ghost_tetromino: GhostTetromino
 
 @export var piece_scene: PackedScene
@@ -34,22 +43,31 @@ func _ready() -> void:
 		add_child(piece)
 		piece.set_texture(tetromino_data.piece_texture)
 		piece.position = cell * piece.get_size()
+	
+	if mode == modes.STATIC || mode == modes.FLOATING:
+		timer.stop()
+	
+	if mode == modes.FLOATING:
+		hard_drop_golden.call_deferred()
 		
-	if !is_next_piece:
+	if mode == modes.STATIC:
+		set_process_input(false)
+
+	if mode != modes.STATIC:
 		position = tetromino_data.spawn_position
 		
-		if tetromino_data.tetromino_type == Shared.Tetromino.I:
-			wall_kicks = Shared.wall_kicks_i
-		else:
-			wall_kicks = Shared.wall_kicks_jlostz
-			
+	if tetromino_data.tetromino_type == Shared.Tetromino.I:
+		wall_kicks = Shared.wall_kicks_i
+	else:
+		wall_kicks = Shared.wall_kicks_jlostz
+	
+	if mode == modes.FALLING:
+		ghost = true
 		ghost_tetromino = ghost_tetromino_scene.instantiate() as GhostTetromino
 		ghost_tetromino.tetromino_data = tetromino_data
 		get_tree().root.add_child.call_deferred(ghost_tetromino)
 		hard_drop_ghost.call_deferred()
-	else: 
-		timer.stop()
-		set_process_input(false)
+		
 
 
 func _input(_event: InputEvent) -> void:
@@ -65,9 +83,23 @@ func _input(_event: InputEvent) -> void:
 		rotate_tetromino(-1)
 	elif Input.is_action_just_pressed("rotate_right"):
 		rotate_tetromino(1)
+	elif Input.is_action_just_pressed("up") and mode == modes.FLOATING:
+		move(Vector2.UP)
+		
+func set_mode(s):
+	if s == "FALLING":
+		mode = modes.FALLING
+	elif s == "STATIC": 
+		mode = modes.STATIC
+	else:
+		mode = modes.FLOATING
 
 func move(direction: Vector2)-> bool: 
+	if mode == modes.STATIC: 
+		return false
+		
 	var new_position = calculate_global_position(direction, global_position)
+	
 	if new_position:
 		global_position = new_position
 		if direction != Vector2.DOWN:
@@ -89,14 +121,18 @@ func calculate_global_position(direction: Vector2, starting_global_position:Vect
 func is_within_game_bounds(direction: Vector2, starting_global_position: Vector2)->bool:
 	for piece in pieces: 
 		var new_position = starting_global_position + piece.position + direction * piece.get_size()
-		if new_position.x < bounds.get("min_x") || new_position.x > bounds.get("max_x") || new_position.y > bounds.get("max_y"):
+		
+		if direction == Vector2.UP and new_position.y < bounds.get("min_y"):
 			return false
+			
+		if new_position.x < bounds.get("min_x") || 	 new_position.x > bounds.get("max_x") || new_position.y > bounds.get("max_y"):
+			return false
+		
+			
 		
 	return true
 
 func is_colliding_with_other_tetrominos(direction: Vector2, starting_global_position: Vector2) -> bool:
-	
-		
 	for tetromino_piece in other_pieces:
 		for piece in pieces:
 			if starting_global_position + piece.position + direction * piece.get_size().x == tetromino_piece.global_position:
@@ -137,6 +173,7 @@ func get_wall_kick_index(rotation_index: int, rotation_direction: int):
 	
 
 func apply_rotation(direction: int):
+		
 	var rotation_matrix
 	if direction == 1: 
 		rotation_matrix = Shared.clockwise_rotation_matrix
@@ -156,18 +193,35 @@ func apply_rotation(direction: int):
 		
 		
 func on_timer_timeout():
+	if mode == modes.FLOATING:
+		return
+		
 	var should_lock = !move(Vector2.DOWN)
 	if should_lock:
 		lock()
 	
 
 func hard_drop():
+	if mode == modes.FLOATING:
+		lock()
+		return
+		
 	while(move(Vector2.DOWN)):
 		continue
 	lock()
-	
+
+func hard_drop_golden():
+	#var final_hard_drop_position
+	#var golden_position_update = calculate_global_position(Vector2.DOWN, global_position)
+	#
+	#while golden_position_update != null:
+		#golden_position_update = calculate_global_position(Vector2.DOWN, ghost_position_update)
+	pass 
 
 func hard_drop_ghost():
+	if !ghost: 
+		return 
+		
 	var final_hard_drop_position
 	var ghost_position_update = calculate_global_position(Vector2.DOWN, global_position)
 	
@@ -194,4 +248,5 @@ func lock():
 	timer.stop()
 	lock_tetromino.emit(self)
 	set_process_input(false)
-	ghost_tetromino.queue_free()
+	if ghost:
+		ghost_tetromino.queue_free()
