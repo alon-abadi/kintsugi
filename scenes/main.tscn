@@ -65,7 +65,7 @@ stretch_mode = 1
 script = ExtResource("3_87jhv")
 board = NodePath("../Board")
 
-[node name="Board" type="Node" parent="." node_paths=PackedStringArray("panel_container")]
+[node name="Board" type="Node" parent="." node_paths=PackedStringArray("panel_container") groups=["board"]]
 script = ExtResource("4_s43os")
 tetromino_scene = ExtResource("5_adtop")
 line_scene = ExtResource("6_k5273")
