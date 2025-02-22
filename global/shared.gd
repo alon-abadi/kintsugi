@@ -1,6 +1,9 @@
 extends Node
 
 signal music_change
+var board : Board
+func _ready() -> void:
+	board = get_tree().get_first_node_in_group("board")
 
 enum Tetromino { 
 	I,
